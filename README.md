@@ -1,8 +1,16 @@
 # insitu-tools
-A set of command line tools that find and compare In situ expression patterns between mRNA expression images.
+A set of command line tools that find and compare In situ expression patterns between mRNA expression images, specifically, the *Drosophila* embryos.
 
-# Usage
-insitu-tools <command> [options]
-## Commands
-### extract
-Extract the foreground area from the image, based on the local standard deviation.
+The algorithm used is described in this [paper](https://dl.acm.org/doi/10.1145/974614.974636).
+
+Some steps are taken to enhance performance, including:
+
+* Coversion of Color images to grayscale, differentiating stains and embryo texture.
+
+* Linear Transformation of intensity to normalize signals across images.
+
+* 4 orientations' comparison to determine the best score.
+
+* Normalize local GMM scores using the self comparison score.
+
+* Global GMM scores (mutual information scores) are calculated on the union area of the 2 embryos.
