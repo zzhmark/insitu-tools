@@ -1,5 +1,5 @@
 # insitu-tools
-A set of command line tools that find and compare In situ expression patterns between mRNA expression images, specifically, the *Drosophila* embryos.
+A set of command line tools that find and compare *In situ* expression patterns between mRNA expression images, specifically, the *Drosophila* embryos.
 
 The algorithm used is described in this [paper](https://dl.acm.org/doi/10.1145/974614.974636).
 
