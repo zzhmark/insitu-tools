@@ -14,3 +14,5 @@ Some steps are taken to enhance performance, including:
 * Normalize local GMM scores using the self comparison score.
 
 * Global GMM scores (mutual information scores) are calculated on the union area of the 2 embryos.
+
+Usages are described in [wiki](https://github.com/zzhmark/insitu-tools/wiki).
