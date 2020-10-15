@@ -46,7 +46,7 @@ def affine_correct(image, mask):
     return image_out, mask_out
 
 
-def register(image, mask, size=None, patch=None, rotate=True, rescale=False, rectify=False):
+def register(image, mask, size=None, patch=None, rotate=True, rescale=True, rectify=False):
     if len(image.shape) > 2:
         if rectify:
             image = saturation_rectified_intensity(image)

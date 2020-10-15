@@ -22,7 +22,7 @@ def global_gmm(image, mask, n=5, label_only=True):
         label[fg_ind[0][min_ind], fg_ind[1][min_ind]] = len(levels)
         fg_ind = fg_ind[0][~min_ind], fg_ind[1][~min_ind]
     if label_only:
-        return label, levels
+        return None, label, levels
     else:
         image = img_as_ubyte(label2rgb(label, image, bg_label=0))
         return image, label, levels
