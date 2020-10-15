@@ -15,4 +15,6 @@ Some steps are taken to enhance performance, including:
 
 * Global GMM scores (mutual information scores) are calculated on the union area of the 2 embryos.
 
+* Down sampling is put in registration.
+
 Usages are described in [wiki](https://github.com/zzhmark/insitu-tools/wiki).
