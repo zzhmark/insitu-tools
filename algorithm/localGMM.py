@@ -18,7 +18,7 @@ def local_gmm(image, global_label, levels, n=10, label_only=True):
             blob_pts = prediction == j
             local_label[lvl_ind[0][blob_pts], lvl_ind[1][blob_pts]] = len(blob_levels)
     if label_only:
-        return local_label, blob_levels
+        image = None
     else:
         image = img_as_ubyte(label2rgb(local_label, image, bg_label=0))
-        return image, local_label, blob_levels
+    return image, local_label, blob_levels

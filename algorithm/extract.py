@@ -21,8 +21,8 @@ def extract(image, kernel=(3, 3), threshold=3, mask_only=False):
                         cv2.THRESH_BINARY)[1].astype(np.uint8)
     mask = fill_hole(thr)
     if mask_only:
-        return None, mask
+        image = None
     else:
         mask_bgr = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
         image = cv2.bitwise_or(image, cv2.bitwise_not(mask_bgr))
-        return image, mask
+    return image, mask
