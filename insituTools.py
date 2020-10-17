@@ -422,21 +422,17 @@ class InsituTools(object):
             *inputImages,
             outputCSV=None,
             reference=None,
+            zeroCutoff=None,
             silent=False
     ):
         """
         Give scores of processed image labels.
 
-        | Comparison is done based on globalGMM and
-        localGMM segmentation results.
-        | For globalGMM, the normalized mutual information
-        score is calculated between 2 images.
-        | For localGMM, the score between 2 images sums up
-        best match blob scores.
-        | The blob score considers both intensity difference
-        and overlap between 2 blobs from 2 images.
-        | Finally, a hybrid score is calculated as the product
-        of the global and local score.
+        | Comparison is done based on globalGMM and localGMM segmentation results.
+        | For globalGMM, the normalized mutual information score is calculated between 2 images.
+        | For localGMM, the score between 2 images sums up best match blob scores.
+        | The blob score considers both intensity difference and overlap between 2 blobs from 2 images.
+        | Finally, a hybrid score is calculated as the product of the global and local score.
 
         :param inputImages: A series of file path to the input images
                             separated by whitespace.
@@ -450,6 +446,10 @@ class InsituTools(object):
                             When omitted, pairwise comparison will be performed,
                             and a matrix will be generated.
                             The input should be like n0,n1,n2,...
+        :param zeroCutoff: A float that makes all figures smaller than
+                            it zero in the score table to make way for
+                            sparse matrix generation. When omitted, the
+                            output table will not be turned to a sparse one.
         :param silent: No standard IO output, otherwise the scores
                         will be printed. But note that when outputCSV
                         is omitted, scores will be printed anyway.
