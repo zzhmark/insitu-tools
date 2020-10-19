@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import os
 
 import algorithm
@@ -321,12 +323,12 @@ class InsituTools(object):
                                     step will not be saved. It only works when
                                     saveImage is specified.
         """
-        inputImage = cv2.imread(
+        input_image = cv2.imread(
             inputImage,
             cv2.IMREAD_GRAYSCALE if grayscale
             else cv2.IMREAD_COLOR
         )
-        if inputImage is None:
+        if input_image is None:
             raise IOError
         if outputDirectory is None:
             outputDirectory = os.path.dirname(inputImage)
@@ -335,14 +337,14 @@ class InsituTools(object):
         if name is None:
             name = os.path.basename(inputImage).split('.')[0]
         extract_image, mask = algorithm.extract(
-            inputImage,
+            input_image,
             filterSize,
             threshold,
             noRemoveBackGround
         )
         register_image, mask = algorithm.register(
             extract_image if extract_image is not None
-            else inputImage,
+            else input_image,
             mask,
             targetSize,
             downSampleFactor,

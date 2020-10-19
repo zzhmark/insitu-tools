@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="insituTools-Odehan", # Replace with your own username
+    name="seu-insitu-tools", # Replace with your own username
     version="0.0.1",
     author="Zuohan Zhao",
     author_email="zzhmark@126.com",
@@ -19,4 +19,18 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.8',
+    install_requires=[
+        'sklearn',
+        'fire',
+        'scipy',
+        'numpy',
+        'pandas'
+        'opencv-python',
+        'skimage'
+    ],
+    scripts=[
+        'bin/insituTools'
+    ],
+    license='MIT',
+    include_package_data=True
 )
