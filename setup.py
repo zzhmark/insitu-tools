@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="seu-insitu-tools", # Replace with your own username
-    version="0.0.2",
+    version="0.0.2.post2",
     author="Zuohan Zhao",
     author_email="zzhmark@126.com",
     description="Find and compare In Situ expression in Drosophila embryos",
@@ -20,13 +20,13 @@ setuptools.setup(
     ],
     python_requires='>=3.8',
     install_requires=[
-        'sklearn',
+        'scikit-learn',
         'fire',
         'scipy',
         'numpy',
         'pandas',
         'opencv-python',
-        'skimage'
+        'scikit-image'
     ],
     scripts=[
         'bin/insituTools'
