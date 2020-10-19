@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="seu-insitu-tools", # Replace with your own username
-    version="0.0.1",
+    version="0.0.2",
     author="Zuohan Zhao",
     author_email="zzhmark@126.com",
     description="Find and compare In Situ expression in Drosophila embryos",
