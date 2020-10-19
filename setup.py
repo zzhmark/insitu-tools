@@ -24,7 +24,7 @@ setuptools.setup(
         'fire',
         'scipy',
         'numpy',
-        'pandas'
+        'pandas',
         'opencv-python',
         'skimage'
     ],
