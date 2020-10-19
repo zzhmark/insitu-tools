@@ -1,7 +1,11 @@
 import os
+
 import algorithm
 import fire
 import cv2
+import numpy as np
+import pandas as pd
+from scipy.sparse import save_npz, dok_matrix
 
 
 class InsituTools(object):
@@ -234,7 +238,7 @@ class InsituTools(object):
             f.write('\n'.join(str(i) for i in levels))
 
     @classmethod
-    def recognizePatterns(
+    def findPatterns(
             cls,
             inputImage,
             outputDirectory=None,
@@ -250,10 +254,14 @@ class InsituTools(object):
             noRectification=False,
             grayscale=False,
             saveImage=False,
-            noRemoveBackGround=False
+            noRemoveBackGround=False,
+            noExtractionImage=False,
+            noRegistrationImage=False,
+            noGlobalGMMImage=False,
+            noLocalGMMImage=False
     ):
         """
-        Recognize patterns from the raw image.
+        Find global and local patterns, beginning from the raw image.
 
         | This command merges all image processing steps.
         
@@ -300,6 +308,18 @@ class InsituTools(object):
                             save computational resources.
         :param noRemoveBackGround: In the extraction step, the background of the image
                                     will not be turned to white.
+        :param noExtractionImage: When specified, the image from the extraction
+                                    step will not be saved. It only works when
+                                    saveImage is specified.
+        :param noRegistrationImage: When specified, the image from the registration
+                                    step will not be saved. It only works when
+                                    saveImage is specified.
+        :param noGlobalGMMImage: When specified, the image from the global GMM
+                                    step will not be saved. It only works when
+                                    saveImage is specified.
+        :param noLocalGMMImage:When specified, the image from the local GMM
+                                    step will not be saved. It only works when
+                                    saveImage is specified.
         """
         inputImage = cv2.imread(
             inputImage,
@@ -346,25 +366,26 @@ class InsituTools(object):
                 not saveImage
             )
         if saveImage:
-            if not cv2.imwrite(
-                    os.path.join(
-                        outputDirectory,
-                        name + '_extract_image.bmp'
-                    ),
-                    inputImage
-            ) or not cv2.imwrite(
+            if not (noRemoveBackGround or noExtractionImage) \
+                    and not cv2.imwrite(
+                os.path.join(
+                    outputDirectory,
+                    name + '_extract_image.bmp'
+                ),
+                extract_image
+            ) or not noRegistrationImage and not cv2.imwrite(
                 os.path.join(
                     outputDirectory,
                     name + '_register_image.bmp'
                 ),
                 register_image
-            ) or not cv2.imwrite(
+            ) or not noGlobalGMMImage and not cv2.imwrite(
                 os.path.join(
                     outputDirectory,
                     name + '_globalGMM_image.bmp'
                 ),
                 global_image
-            ) or not cv2.imwrite(
+            ) or not noLocalGMMImage and not cv2.imwrite(
                 os.path.join(
                     outputDirectory,
                     name + '_localGMM_image.bmp'
@@ -375,15 +396,9 @@ class InsituTools(object):
         if not cv2.imwrite(
                 os.path.join(
                     outputDirectory,
-                    name + '_extract_mask.bmp'
+                    name + '_mask.bmp'
                 ),
                 mask
-        ) or not cv2.imwrite(
-            os.path.join(
-                outputDirectory,
-                name + '_register_mask.bmp'
-            ),
-            mask
         ) or not cv2.imwrite(
             os.path.join(
                 outputDirectory,
@@ -415,15 +430,19 @@ class InsituTools(object):
         ) as f:
             f.write('\n'.join(str(i) for i in local_levels))
 
-
     @classmethod
     def score(
             cls,
-            *inputImages,
-            outputCSV=None,
+            *inputPrefixes,
+            maskSuffix='_mask.bmp',
+            globalLabelSuffix='_globalGMM_label.bmp',
+            localLabelSuffix='_localGMM_label.bmp',
+            localLevelsSuffix='_localGMM_levels.txt',
+            outputTablePath=None,
             reference=None,
-            zeroCutoff=None,
-            silent=False
+            globalScoreCutoff=0.0,
+            sparseCutoff=None,
+            noFlipping=False
     ):
         """
         Give scores of processed image labels.
@@ -434,10 +453,27 @@ class InsituTools(object):
         | The blob score considers both intensity difference and overlap between 2 blobs from 2 images.
         | Finally, a hybrid score is calculated as the product of the global and local score.
 
-        :param inputImages: A series of file path to the input images
-                            separated by whitespace.
-        :param outputCSV: The path to the csv file to keep the score table.
-                            When omitted, no file will be generated.
+        :param inputPrefixes: A series of file path prefixes, which
+                            includes the directory and the basename to the
+                            input labels and levels separated by whitespace.
+                            Files for each sample should include a global
+                            label file, a local label file and a local levels
+                            file.
+        :param maskSuffix: The suffix for all input masks. The full path
+                            concatenates the inputPrefix and the maskSuffix.
+        :param globalLabelSuffix: The suffix for all input global GMM label images.
+                                    The full path concatenates the inputPrefix
+                                    and the globalSuffix.
+        :param localLabelSuffix: The suffix for all input local GMM label images.
+                                    The full path concatenates the inputPrefix
+                                    and the localSuffix.
+        :param localLevelsSuffix: The suffix for all input local GMM levels files.
+                                    The full path concatenates the inputPrefix
+                                    and the levelSuffix.
+        :param outputTablePath: The path to the table file, a csv or an npz,  to
+                                keep the score table. When omitted, no file will
+                                be generated, and the result will be printed, in
+                                the form of matrix or sparse matrix.
         :param reference: A list of integers that specify the indices of the
                             input images to be treated as references,
                             that is, the comparison will be performed
@@ -446,15 +482,79 @@ class InsituTools(object):
                             When omitted, pairwise comparison will be performed,
                             and a matrix will be generated.
                             The input should be like n0,n1,n2,...
-        :param zeroCutoff: A float that makes all figures smaller than
-                            it zero in the score table to make way for
-                            sparse matrix generation. When omitted, the
-                            output table will not be turned to a sparse one.
-        :param silent: No standard IO output, otherwise the scores
-                        will be printed. But note that when outputCSV
-                        is omitted, scores will be printed anyway.
+        :param globalScoreCutoff: A float ranging from 0 to 1 that speeds up
+                                    scoring by cutting hybrid scores with global
+                                    scores smaller than it down to 0, skipping
+                                    the local scoring. If smaller than sparseCutoff,
+                                    its place will be taken by sparseCutoff.
+        :param sparseCutoff: A float ranging from 0 to 1 that cuts all figures
+                            smaller than it down to 0 in the score table to make way for
+                            sparse matrix generation. When omitted, the output table
+                            will not be turned to a sparse one.
+        :param noFlipping: By default, the program computes the orientation invariant 
+                        score for each pairwise comparison. When specified, no
+                        flipping will take place and comparisons are based on the
+                        original orientation.
         """
-        pass
+        masks = [np.array([])] * len(inputPrefixes)
+        global_labels = [np.array([])] * len(inputPrefixes)
+        local_labels = [np.array([])] * len(inputPrefixes)
+        local_levels_list = [[]] * len(inputPrefixes)
+        for i, prefix in zip(range(len(inputPrefixes)), inputPrefixes):
+            masks[i] = cv2.imread(
+                prefix + maskSuffix,
+                cv2.IMREAD_GRAYSCALE
+            )
+            global_labels[i] = cv2.imread(
+                prefix + globalLabelSuffix,
+                cv2.IMREAD_GRAYSCALE
+            )
+            local_labels[i] = cv2.imread(
+                prefix + localLabelSuffix,
+                cv2.IMREAD_GRAYSCALE
+            )
+            if masks[i] is None or \
+                    global_labels[i] is None or \
+                    local_labels[i] is None:
+                raise IOError
+            print(local_levels_list[i])
+            with open(prefix + localLevelsSuffix) as f:
+                local_levels_list[i] = [float(i) for i in f.readlines()]
+        n_row = len(reference)
+        n_col = len(inputPrefixes)
+        if sparseCutoff is None:
+            score_table = np.zeros((n_row, n_col))
+        else:
+            score_table = dok_matrix((n_row, n_col))
+            if sparseCutoff > globalScoreCutoff:
+                globalScoreCutoff = sparseCutoff
+        score_table = algorithm.score(
+            score_table,
+            reference,
+            masks,
+            global_labels,
+            local_labels,
+            local_levels_list,
+            globalScoreCutoff,
+            not noFlipping
+        )
+        if sparseCutoff is None:
+            samples = [os.path.basename(i) for i in inputPrefixes]
+            score_table = pd.DataFrame(
+                score_table,
+                index=samples[reference],
+                columns=samples
+            )
+        else:
+            score_table = score_table.tolil()
+            score_table[score_table < sparseCutoff] = 0
+        if outputTablePath is None:
+            return score_table
+        else:
+            if sparseCutoff is None:
+                save_npz(outputTablePath, score_table)
+            else:
+                score_table.to_csv(outputTablePath)
 
 
 if __name__ == '__main__':
