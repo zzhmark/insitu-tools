@@ -19,7 +19,7 @@ Some steps are taken to enhance performance, including:
 
 Usages are described in [wiki](https://github.com/zzhmark/insitu-tools/wiki).
 
-# Installation
+## Installation
 
 ```
 pip install seu-insitu-tools
