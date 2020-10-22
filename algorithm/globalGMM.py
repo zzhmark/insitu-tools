@@ -6,9 +6,9 @@ from skimage import img_as_ubyte
 
 def global_gmm(image, mask, n=5, label_only=True):
     assert type(image) is np.ndarray
-    assert (image.shape) == 2
+    assert len(image.shape) == 2
     assert type(mask) is np.ndarray
-    assert (mask.shape) == 2
+    assert len(mask.shape) == 2
     global_mean = int(np.mean(image[mask > 0]))
     label = np.zeros(mask.shape, dtype=np.uint8)
     levels = []
