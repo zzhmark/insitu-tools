@@ -18,3 +18,9 @@ Some steps are taken to enhance performance, including:
 * Down sampling is put in registration.
 
 Usages are described in [wiki](https://github.com/zzhmark/insitu-tools/wiki).
+
+## Installation
+
+```
+pip install seu-insitu-tools
+```

@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="insituTools-Odehan", # Replace with your own username
-    version="0.0.1",
+    name="seu-insitu-tools", # Replace with your own username
+    version="0.0.2.post3",
     author="Zuohan Zhao",
     author_email="zzhmark@126.com",
     description="Find and compare In Situ expression in Drosophila embryos",
@@ -19,4 +19,18 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.8',
+    install_requires=[
+        'scikit-learn',
+        'fire',
+        'scipy',
+        'numpy',
+        'pandas',
+        'opencv-python',
+        'scikit-image'
+    ],
+    scripts=[
+        'bin/insituTools'
+    ],
+    license='MIT',
+    include_package_data=True
 )
