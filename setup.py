@@ -1,11 +1,16 @@
 import setuptools
+import versioneer
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open("requirements.txt", "r") as fh:
+    requirements = [line.strip() for line in fh]
+
 setuptools.setup(
-    name="seu-insitu-tools", # Replace with your own username
-    version="0.0.3",
+    name="seu-insitu-tools",  # Replace with your own username
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author="Zuohan Zhao",
     author_email="zzhmark@126.com",
     description="Find and compare In Situ expression in Drosophila embryos",
@@ -18,19 +23,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.8',
-    install_requires=[
-        'scikit-learn',
-        'fire',
-        'scipy',
-        'numpy',
-        'pandas',
-        'opencv-python',
-        'scikit-image'
-    ],
-    scripts=[
-        'bin/insituTools'
-    ],
-    license='MIT',
-    include_package_data=True
+    python_requires=">=3.8",
+    install_requires=requirements,
+    scripts=["bin/insituTools"],
+    license="MIT",
+    include_package_data=True,
 )

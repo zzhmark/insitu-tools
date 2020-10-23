@@ -25,10 +25,23 @@ def hybrid_score(global_scores, local_scores):
     return np.max(np.array(global_scores) * np.array(local_scores))
 
 
-def score(table, reference, masks, global_labels, local_labels,
-          local_levels_list, global_score_cutoff=0, flip=True):
-    assert len(reference) <= len(masks) == len(global_labels) \
-           == len(local_labels) == len(local_levels_list)
+def score(
+    table,
+    reference,
+    masks,
+    global_labels,
+    local_labels,
+    local_levels_list,
+    global_score_cutoff=0,
+    flip=True,
+):
+    assert (
+        len(reference)
+        <= len(masks)
+        == len(global_labels)
+        == len(local_labels)
+        == len(local_levels_list)
+    )
     n_row = len(reference)
     n_col = len(masks)
     for i in range(n_row):
@@ -46,16 +59,21 @@ def score(table, reference, masks, global_labels, local_labels,
             ref_local_labels.append(np.fliplr(local_labels[i]))
             ref_local_labels.append(np.fliplr(ref_local_labels[1]))
         for j in range(n_col):
-            global_scores = [global_score(
-                mask, masks[j],
-                label, global_labels[j]
-            ) for mask, label in zip(ref_masks, ref_global_labels)]
+            global_scores = [
+                global_score(mask, masks[j], label, global_labels[j])
+                for mask, label in zip(ref_masks, ref_global_labels)
+            ]
             if np.max(global_scores) > global_score_cutoff:
                 table[i, j] = hybrid_score(
                     global_scores,
-                    [local_score(
-                        label, local_labels[j],
-                        local_levels_list[i], local_levels_list[j]
-                    ) for label in ref_local_labels]
+                    [
+                        local_score(
+                            label,
+                            local_labels[j],
+                            local_levels_list[i],
+                            local_levels_list[j],
+                        )
+                        for label in ref_local_labels
+                    ],
                 )
-    return normalize(table, norm='max')
+    return normalize(table, norm="max")
