@@ -169,11 +169,11 @@ class InsituTools(object):
     @classmethod
     def localGMM(
         cls,
-        inputImage,
         inputLabel,
         inputLevels,
         outputLabel,
         outputLevels,
+        inputImage=None,
         outputImage=None,
         limitOfLocalKernels=10,
     ):
@@ -208,12 +208,12 @@ class InsituTools(object):
         """
         image = cv2.imread(inputImage, cv2.IMREAD_GRAYSCALE)
         label = cv2.imread(inputLabel, cv2.IMREAD_GRAYSCALE)
-        if image is None or label is None:
+        if image is None and inputImage is not None or label is None:
             raise IOError
         with open(inputLevels) as f:
             levels = [float(i) for i in f.readlines()]
         image, label, levels = algorithm.local_gmm(
-            image, label, levels, limitOfLocalKernels, outputImage is None
+            label, levels, limitOfLocalKernels, image
         )
         if image is not None:
             if not cv2.imwrite(outputImage, image):
@@ -254,7 +254,9 @@ class InsituTools(object):
         :param inputImage: The path to the input image.
         :param outputDirectory: The path to the directory to store all
                                 the output files. Duplicated files will
-                                be overwritten.
+                                be overwritten. If omitted, output files
+                                will be stored in the same directory as
+                                the input image.
         :param name: The mutual basename prefix for each output file.
                         if omitted, the prefix will be the basename of
                         the input image.
@@ -334,11 +336,10 @@ class InsituTools(object):
             register_image, mask, numberOfGlobalKernels, not saveImage
         )
         local_image, local_label, local_levels = algorithm.local_gmm(
-            register_image,
             global_label,
             global_levels,
             limitOfLocalKernels,
-            not saveImage,
+            register_image
         )
         if saveImage:
             if (
