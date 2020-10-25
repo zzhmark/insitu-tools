@@ -17,7 +17,7 @@ def fill_hole(mask):
         type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2
     ), "The input mask has to be a uint8 2D numpy array."
     contour = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
-    mask = cv2.drawContours(mask, contour, -1, np.uint8(-1), cv2.FILLED)
+    mask = cv2.drawContours(mask, contour, -1, 255, cv2.FILLED)
     return mask
 
 
@@ -32,9 +32,7 @@ def extract(image, filterSize=3, threshold=3, mask_only=False):
         image if len(image.shape) == 2 else cv2.cvtColor(image, cv2.COLOR_BGR2GRAY),
         kernel,
     )
-    thr = cv2.threshold(std, threshold, np.uint8(-1), cv2.THRESH_BINARY)[1].astype(
-        np.uint8
-    )
+    thr = cv2.threshold(std, threshold, 255, cv2.THRESH_BINARY)[1].astype(np.uint8)
     mask = fill_hole(thr)
     image = (
         None

@@ -69,7 +69,6 @@ class InsituTools(object):
         outputImage,
         outputMask,
         targetSize=None,
-        downSampleFactor=None,
         noRotation=False,
         noIntensityRescale=False,
         noRectification=False,
@@ -90,10 +89,7 @@ class InsituTools(object):
         :param targetSize: An integer tuple that specifies the width and height of the
                             registered image and mask before down sampling if has.
                             When omitted, no resizing will be performed.
-                            The tuple should be like (WIDTH, HEIGHT)
-        :param downSampleFactor: An integer that specifies the side length of the local
-                                    patch that is used to pool the image and mask.
-                                    When omitted, no down sampling will be performed.
+                            The tuple should be like (WIDTH, HEIGHT).
         :param noRotation: Skip rotation, which can save some computational resource
                             when rotation is already performed.
         :param noIntensityRescale: Leave the intensity distribution as original.
@@ -112,7 +108,6 @@ class InsituTools(object):
             image,
             mask,
             targetSize,
-            downSampleFactor,
             not noRotation,
             not noIntensityRescale,
             not noRectification,
@@ -125,9 +120,11 @@ class InsituTools(object):
         cls,
         inputImage,
         inputMask,
+        outputMask,
         outputLabel,
         outputLevels,
         outputImage=None,
+        downSampleFactor=1,
         numberOfGlobalKernels=5,
     ):
         """
@@ -140,6 +137,8 @@ class InsituTools(object):
         :param inputImage: The path to the input image，
                             read as grayscale.
         :param inputMask: The path to the input mask.
+        :param outputMask: The path to the output mask, which is down sampled
+                            when down sampling factor is greater than 1.
         :param outputLabel: The path to the output label file.
         :param outputLevels:The path to the file to keep the
                                 globally generated levels.
@@ -150,20 +149,23 @@ class InsituTools(object):
                                         Note that if the number of kernels exceeds
                                         that of the sample pixels, the latter will
                                         take the place.
+        :param downSampleFactor: An integer that specifies the side length of the local
+                                    patch that is used to pool the image and mask.
+                                    Default as 1, which means no down sampling will be performed.
         """
         image = cv2.imread(inputImage, cv2.IMREAD_GRAYSCALE)
         mask = cv2.imread(inputMask, cv2.IMREAD_GRAYSCALE)
         if image is None or mask is None:
             raise IOError("Image or mask reading failure.")
-        image, label, levels = algorithm.global_gmm(
-            image, mask, numberOfGlobalKernels, outputImage is None
+        image, mask, label, levels = algorithm.global_gmm(
+            image, mask, downSampleFactor, numberOfGlobalKernels, outputImage is None
         )
         if image is not None:
-            if not cv2.imwrite(outputLabel, image):
+            if not cv2.imwrite(outputImage, image):
                 raise IOError("Image writing failure.")
-        if not cv2.imwrite(outputLabel, label):
-            raise IOError("Label reading failure.")
-        with open(outputLevels) as f:
+        if not cv2.imwrite(outputLabel, label) or not cv2.imwrite(outputMask, mask):
+            raise IOError("Mask or label writing failure.")
+        with open(outputLevels, "w") as f:
             f.write("\n".join(str(i) for i in levels))
 
     @classmethod
@@ -220,7 +222,7 @@ class InsituTools(object):
                 raise IOError("Image writing failure.")
         if not cv2.imwrite(outputLabel, label):
             raise IOError("Label writing failure.")
-        with open(outputLevels) as f:
+        with open(outputLevels, "w") as f:
             f.write("\n".join(str(i) for i in levels))
 
     @classmethod
@@ -272,7 +274,7 @@ class InsituTools(object):
                             The input style should be like WIDTH,HEIGHT
         :param downSampleFactor: An integer that specifies the side length of the local
                                     patch that is used to pool the image and mask.
-                                    When omitted, no down sampling will be performed.
+                                    Default as 1, which means no down sampling will be performed.
         :param numberOfGlobalKernels: The number of Gaussian mixture kernels
                                         for each iteration during expectation maximization.
                                         Note that if the number of kernels exceeds
@@ -327,13 +329,12 @@ class InsituTools(object):
             extract_image if extract_image is not None else input_image,
             mask,
             targetSize,
-            downSampleFactor,
             not noRotation,
             not noIntensityRescale,
             not noRectification,
         )
-        global_image, global_label, global_levels = algorithm.global_gmm(
-            register_image, mask, numberOfGlobalKernels, not saveImage
+        global_image, global_mask, global_label, global_levels = algorithm.global_gmm(
+            register_image, mask, downSampleFactor, numberOfGlobalKernels, not saveImage
         )
         local_image, local_label, local_levels = algorithm.local_gmm(
             global_label, global_levels, limitOfLocalKernels, register_image
@@ -363,7 +364,9 @@ class InsituTools(object):
             ):
                 raise IOError("Image writing failure.")
         if (
-            not cv2.imwrite(os.path.join(outputDirectory, name + "_mask.bmp"), mask)
+            not cv2.imwrite(
+                os.path.join(outputDirectory, name + "_mask.bmp"), global_mask
+            )
             or not cv2.imwrite(
                 os.path.join(outputDirectory, name + "_globalGMM_label.bmp"),
                 global_label,
@@ -465,7 +468,6 @@ class InsituTools(object):
             )
             if masks[i] is None or global_labels[i] is None or local_labels[i] is None:
                 raise IOError("Mask or label reading failure.")
-            print(local_levels_list[i])
             with open(prefix + localLevelsSuffix) as f:
                 local_levels_list[i] = [float(i) for i in f.readlines()]
         n_row = len(inputPrefixes) if reference is None else len(reference)
@@ -488,9 +490,10 @@ class InsituTools(object):
         )
         if sparseCutoff is None:
             samples = [os.path.basename(i) for i in inputPrefixes]
-            score_table = pd.DataFrame(
-                score_table, index=samples[reference], columns=samples
+            ref_samples = (
+                samples if reference is None else [samples[i] for i in reference]
             )
+            score_table = pd.DataFrame(score_table, index=ref_samples, columns=samples)
         else:
             score_table = score_table.tolil()
             score_table[score_table < sparseCutoff] = 0
@@ -498,9 +501,9 @@ class InsituTools(object):
             return score_table
         else:
             if sparseCutoff is None:
-                save_npz(outputTablePath, score_table)
-            else:
                 score_table.to_csv(outputTablePath)
+            else:
+                save_npz(outputTablePath, score_table)
 
 
 def main():
