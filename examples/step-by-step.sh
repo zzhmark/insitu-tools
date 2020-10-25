@@ -21,13 +21,14 @@ for gene in $GENES; do
     	--inputMask "$OUTPUT_DIR/${IMAGE_IDS[$i]}_mask.bmp" \
 	    --outputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_registered.bmp" \
         --outputMask "$OUTPUT_DIR/${IMAGE_IDS[$i]}_mask_registered.bmp" \
-        --downSampleFactor 9 \
         --noRotation;
     insituTools globalGMM \
         --inputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_registered.bmp" \
         --inputMask "$OUTPUT_DIR/${IMAGE_IDS[$i]}_mask_registered.bmp" \
+        --outputMask "$OUTPUT_DIR/${IMAGE_IDS[$i]}_mask_reduced.bmp" \
         --outputLabel "$OUTPUT_DIR/${IMAGE_IDS[$i]}_label_global.bmp" \
         --outputLevels "$OUTPUT_DIR/${IMAGE_IDS[$i]}_levels_global.txt" \
+        --downSampleFactor 5 \
         --outputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_global.bmp";
     insituTools localGMM \
         --inputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_registered.bmp" \

@@ -32,9 +32,7 @@ def extract(image, filterSize=3, threshold=3, mask_only=False):
         image if len(image.shape) == 2 else cv2.cvtColor(image, cv2.COLOR_BGR2GRAY),
         kernel,
     )
-    thr = cv2.threshold(std, threshold, 255, cv2.THRESH_BINARY)[1].astype(
-        np.uint8
-    )
+    thr = cv2.threshold(std, threshold, 255, cv2.THRESH_BINARY)[1].astype(np.uint8)
     mask = fill_hole(thr)
     image = (
         None

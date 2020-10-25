@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.mixture import BayesianGaussianMixture
 from skimage.color import label2rgb
 from skimage import img_as_ubyte
+import cv2
 
 
 def local_gmm(global_label, levels, n=10, image=None):
@@ -31,6 +32,14 @@ def local_gmm(global_label, levels, n=10, image=None):
             blob_levels.append(levels[i])
             blob_pts = prediction == j
             local_label[lvl_ind[0][blob_pts], lvl_ind[1][blob_pts]] = len(blob_levels)
-    if image is not None:
-        image = img_as_ubyte(label2rgb(local_label, image, bg_label=0))
-    return image, local_label, blob_levels
+    label_resized = (
+        local_label
+        if image.shape == local_label.shape
+        else cv2.resize(local_label, image.shape[::-1], interpolation=cv2.INTER_NEAREST)
+    )
+    image_labeled = (
+        None
+        if image is None
+        else img_as_ubyte(label2rgb(label_resized, image, bg_label=0))
+    )
+    return image_labeled, local_label, blob_levels
