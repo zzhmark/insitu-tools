@@ -14,6 +14,7 @@ for gene in $GENES; do
     insituTools findPatterns \
         --inputImage "$PROJECT_FOLDER/data/$gene/$STAGE/${IMAGE_IDS[$i]}.bmp" \
         --outputDirectory "$OUTPUT_DIR" \
-        --downSampleFactor 9 \
+        --downSampleFactor 5 \
         --noRotation --noRemoveBackground
+    i=$(expr $i + 1)
 done

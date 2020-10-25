@@ -12,16 +12,16 @@ fi
 
 i=0
 for gene in $GENES; do
-    IMAGE_PATH="$PROJECT_FOLDER/data/$gene/$STAGE/${IMAGE_IDS[$i]}.bmp";
+    IMAGE_PATH="$PROJECT_FOLDER/data/$gene/$STAGE/${IMAGE_IDS[$i]}.bmp"
     insituTools extract \
 	    --inputImage "$IMAGE_PATH" \
-	    --outputMask "$OUTPUT_DIR/${IMAGE_IDS[$i]}_mask.bmp";
+	    --outputMask "$OUTPUT_DIR/${IMAGE_IDS[$i]}_mask.bmp"
     insituTools register \
 	    --inputImage "$IMAGE_PATH" \
     	--inputMask "$OUTPUT_DIR/${IMAGE_IDS[$i]}_mask.bmp" \
 	    --outputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_registered.bmp" \
         --outputMask "$OUTPUT_DIR/${IMAGE_IDS[$i]}_mask_registered.bmp" \
-        --noRotation;
+        --noRotation
     insituTools globalGMM \
         --inputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_registered.bmp" \
         --inputMask "$OUTPUT_DIR/${IMAGE_IDS[$i]}_mask_registered.bmp" \
@@ -29,14 +29,14 @@ for gene in $GENES; do
         --outputLabel "$OUTPUT_DIR/${IMAGE_IDS[$i]}_label_global.bmp" \
         --outputLevels "$OUTPUT_DIR/${IMAGE_IDS[$i]}_levels_global.txt" \
         --downSampleFactor 5 \
-        --outputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_global.bmp";
+        --outputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_global.bmp"
     insituTools localGMM \
         --inputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_registered.bmp" \
         --inputLabel "$OUTPUT_DIR/${IMAGE_IDS[$i]}_label_global.bmp" \
         --inputLevels "$OUTPUT_DIR/${IMAGE_IDS[$i]}_levels_global.txt" \
         --outputLabel "$OUTPUT_DIR/${IMAGE_IDS[$i]}_label_local.bmp" \
         --outputLevels "$OUTPUT_DIR/${IMAGE_IDS[$i]}_levels_local.txt" \
-        --outputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_local.bmp";
-    i=$(expr $i + 1);
+        --outputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_local.bmp"
+    i=$(expr $i + 1)
 done
 
