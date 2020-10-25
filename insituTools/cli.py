@@ -468,7 +468,6 @@ class InsituTools(object):
             )
             if masks[i] is None or global_labels[i] is None or local_labels[i] is None:
                 raise IOError("Mask or label reading failure.")
-            print(local_levels_list[i])
             with open(prefix + localLevelsSuffix) as f:
                 local_levels_list[i] = [float(i) for i in f.readlines()]
         n_row = len(inputPrefixes) if reference is None else len(reference)
@@ -491,9 +490,10 @@ class InsituTools(object):
         )
         if sparseCutoff is None:
             samples = [os.path.basename(i) for i in inputPrefixes]
-            score_table = pd.DataFrame(
-                score_table, index=samples[reference], columns=samples
+            ref_samples = (
+                samples if reference is None else [samples[i] for i in reference]
             )
+            score_table = pd.DataFrame(score_table, index=ref_samples, columns=samples)
         else:
             score_table = score_table.tolil()
             score_table[score_table < sparseCutoff] = 0
@@ -501,9 +501,9 @@ class InsituTools(object):
             return score_table
         else:
             if sparseCutoff is None:
-                save_npz(outputTablePath, score_table)
-            else:
                 score_table.to_csv(outputTablePath)
+            else:
+                save_npz(outputTablePath, score_table)
 
 
 def main():
