@@ -1,5 +1,4 @@
 include README.md
-include data/*
 include versioneer.py
 include insituTools/_version.py
 include LICENSE

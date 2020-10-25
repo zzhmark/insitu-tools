@@ -14,7 +14,7 @@ def get_angle(v1, v2):
 
 def saturation_rectified_intensity(image):
     assert (
-        type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 2
+        type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 3
     ), "The input image has to be a uint8 2D numpy array."
     image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     saturation = img_as_float(image_hsv[:, :, 1])
@@ -68,7 +68,7 @@ def register(
     assert (
         type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2
     ), "The input mask has to be a uint8 2D numpy array."
-    assert len(size) == 2, "The 'size' should be a tuple of 2 integers."
+    assert size is None or len(size) == 2, "The 'size' should be a tuple of 2 integers, or does not exist."
     assert patchSize is None or type(patchSize) is int
     assert type(rotate) is bool
     assert type(rescale) is bool

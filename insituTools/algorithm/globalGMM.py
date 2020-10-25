@@ -18,13 +18,13 @@ def global_gmm(image, mask, n=5, label_only=True):
     levels = []
     fg_ind = mask.nonzero()
     while True:
-        data = image[fg_ind]
+        data = image[fg_ind].reshape((-1, 1))
         gmm = GaussianMixture(n_components=min(n, len(data)), random_state=123)
         prediction, means = gmm.fit_predict(data), gmm.means_
-        min_label = np.argmin(means)
-        if means[min_label] >= global_mean:
+        min_label, min_mean = np.argmin(means), np.min(means)
+        if min_mean >= global_mean:
             break
-        levels.append(means[min_label])
+        levels.append(min_mean)
         min_ind = prediction == min_label
         label[fg_ind[0][min_ind], fg_ind[1][min_ind]] = len(levels)
         fg_ind = fg_ind[0][~min_ind], fg_ind[1][~min_ind]

@@ -32,9 +32,9 @@ for gene in $GENES; do
     insituTools localGMM \
         --inputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_registered.bmp" \
         --inputLabel "$OUTPUT_DIR/${IMAGE_IDS[$i]}_label_global.bmp" \
-        --inputLevels "$OUTPUT_DIR/${IMAGE_IDS[$i]}_levels_global.bmp" \
+        --inputLevels "$OUTPUT_DIR/${IMAGE_IDS[$i]}_levels_global.txt" \
         --outputLabel "$OUTPUT_DIR/${IMAGE_IDS[$i]}_label_local.bmp" \
-        --outputLevels "$OUTPUT_DIR/${IMAGE_IDS[$i]}_levels_local.bmp" \
+        --outputLevels "$OUTPUT_DIR/${IMAGE_IDS[$i]}_levels_local.txt" \
         --outputImage "$OUTPUT_DIR/${IMAGE_IDS[$i]}_local.bmp";
     i=$(expr $i + 1);
 done

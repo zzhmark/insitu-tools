@@ -159,11 +159,11 @@ class InsituTools(object):
             image, mask, numberOfGlobalKernels, outputImage is None
         )
         if image is not None:
-            if not cv2.imwrite(outputLabel, image):
+            if not cv2.imwrite(outputImage, image):
                 raise IOError("Image writing failure.")
         if not cv2.imwrite(outputLabel, label):
             raise IOError("Label reading failure.")
-        with open(outputLevels) as f:
+        with open(outputLevels, 'w') as f:
             f.write("\n".join(str(i) for i in levels))
 
     @classmethod
@@ -220,7 +220,7 @@ class InsituTools(object):
                 raise IOError("Image writing failure.")
         if not cv2.imwrite(outputLabel, label):
             raise IOError("Label writing failure.")
-        with open(outputLevels) as f:
+        with open(outputLevels, 'w') as f:
             f.write("\n".join(str(i) for i in levels))
 
     @classmethod
