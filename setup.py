@@ -25,11 +25,7 @@ setuptools.setup(
     ],
     python_requires=">=3.8",
     install_requires=requirements,
-    entry_points = {
-        'console_scripts': [
-            'insituTools=insituTools.cli:main'
-        ]
-    },
+    entry_points={"console_scripts": ["insituTools=insituTools.cli:main"]},
     license="MIT",
     include_package_data=True,
 )

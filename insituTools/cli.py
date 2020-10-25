@@ -20,13 +20,13 @@ class InsituTools(object):
 
     @classmethod
     def extract(
-            cls,
-            inputImage,
-            outputMask,
-            outputImage=None,
-            filterSize=3,
-            threshold=3.0,
-            grayscale=False,
+        cls,
+        inputImage,
+        outputMask,
+        outputImage=None,
+        filterSize=3,
+        threshold=3.0,
+        grayscale=False,
     ):
         """
         Foreground extraction.
@@ -51,29 +51,29 @@ class InsituTools(object):
             inputImage, cv2.IMREAD_GRAYSCALE if grayscale else cv2.IMREAD_COLOR
         )
         if image is None:
-            raise IOError('Image reading failure.')
+            raise IOError("Image reading failure.")
         image, mask = algorithm.extract(
             image, filterSize, threshold, outputImage is None
         )
         if outputImage is not None:
             if not cv2.imwrite(outputImage, image):
-                raise IOError('Image writing failure.')
+                raise IOError("Image writing failure.")
         if not cv2.imwrite(outputMask, mask):
-            raise IOError('Mask writing failure.')
+            raise IOError("Mask writing failure.")
 
     @classmethod
     def register(
-            cls,
-            inputImage,
-            inputMask,
-            outputImage,
-            outputMask,
-            targetSize=None,
-            downSampleFactor=None,
-            noRotation=False,
-            noIntensityRescale=False,
-            noRectification=False,
-            grayscale=False,
+        cls,
+        inputImage,
+        inputMask,
+        outputImage,
+        outputMask,
+        targetSize=None,
+        downSampleFactor=None,
+        noRotation=False,
+        noIntensityRescale=False,
+        noRectification=False,
+        grayscale=False,
     ):
         """
         Image and mask registration.
@@ -107,7 +107,7 @@ class InsituTools(object):
         )
         mask = cv2.imread(inputMask, cv2.IMREAD_GRAYSCALE)
         if image is None or mask is None:
-            raise IOError('Image or mask reading failure.')
+            raise IOError("Image or mask reading failure.")
         image, mask = algorithm.register(
             image,
             mask,
@@ -118,17 +118,17 @@ class InsituTools(object):
             not noRectification,
         )
         if not cv2.imwrite(outputImage, image) or not cv2.imwrite(outputMask, mask):
-            raise IOError('Image or mask writing failure.')
+            raise IOError("Image or mask writing failure.")
 
     @classmethod
     def globalGMM(
-            cls,
-            inputImage,
-            inputMask,
-            outputLabel,
-            outputLevels,
-            outputImage=None,
-            numberOfGlobalKernels=5,
+        cls,
+        inputImage,
+        inputMask,
+        outputLabel,
+        outputLevels,
+        outputImage=None,
+        numberOfGlobalKernels=5,
     ):
         """
         Global Gaussian mixture model fitting.
@@ -154,28 +154,28 @@ class InsituTools(object):
         image = cv2.imread(inputImage, cv2.IMREAD_GRAYSCALE)
         mask = cv2.imread(inputMask, cv2.IMREAD_GRAYSCALE)
         if image is None or mask is None:
-            raise IOError('Image or mask reading failure.')
+            raise IOError("Image or mask reading failure.")
         image, label, levels = algorithm.global_gmm(
             image, mask, numberOfGlobalKernels, outputImage is None
         )
         if image is not None:
             if not cv2.imwrite(outputLabel, image):
-                raise IOError('Image writing failure.')
+                raise IOError("Image writing failure.")
         if not cv2.imwrite(outputLabel, label):
-            raise IOError('Label reading failure.')
+            raise IOError("Label reading failure.")
         with open(outputLevels) as f:
             f.write("\n".join(str(i) for i in levels))
 
     @classmethod
     def localGMM(
-            cls,
-            inputLabel,
-            inputLevels,
-            outputLabel,
-            outputLevels,
-            inputImage=None,
-            outputImage=None,
-            limitOfLocalKernels=10,
+        cls,
+        inputLabel,
+        inputLevels,
+        outputLabel,
+        outputLevels,
+        inputImage=None,
+        outputImage=None,
+        limitOfLocalKernels=10,
     ):
         """
         Local Gaussian mixture model fitting.
@@ -209,7 +209,7 @@ class InsituTools(object):
         image = cv2.imread(inputImage, cv2.IMREAD_GRAYSCALE)
         label = cv2.imread(inputLabel, cv2.IMREAD_GRAYSCALE)
         if image is None and inputImage is not None or label is None:
-            raise IOError('Image or label reading failure.')
+            raise IOError("Image or label reading failure.")
         with open(inputLevels) as f:
             levels = [float(i) for i in f.readlines()]
         image, label, levels = algorithm.local_gmm(
@@ -217,34 +217,34 @@ class InsituTools(object):
         )
         if image is not None:
             if not cv2.imwrite(outputImage, image):
-                raise IOError('Image writing failure.')
+                raise IOError("Image writing failure.")
         if not cv2.imwrite(outputLabel, label):
-            raise IOError('Label writing failure.')
+            raise IOError("Label writing failure.")
         with open(outputLevels) as f:
             f.write("\n".join(str(i) for i in levels))
 
     @classmethod
     def findPatterns(
-            cls,
-            inputImage,
-            outputDirectory=None,
-            name=None,
-            filterSize=3,
-            threshold=3.0,
-            targetSize=None,
-            downSampleFactor=None,
-            numberOfGlobalKernels=5,
-            limitOfLocalKernels=10,
-            noRotation=False,
-            noIntensityRescale=False,
-            noRectification=False,
-            grayscale=False,
-            saveImage=False,
-            noRemoveBackground=False,
-            noExtractionImage=False,
-            noRegistrationImage=False,
-            noGlobalGMMImage=False,
-            noLocalGMMImage=False,
+        cls,
+        inputImage,
+        outputDirectory=None,
+        name=None,
+        filterSize=3,
+        threshold=3.0,
+        targetSize=None,
+        downSampleFactor=None,
+        numberOfGlobalKernels=5,
+        limitOfLocalKernels=10,
+        noRotation=False,
+        noIntensityRescale=False,
+        noRectification=False,
+        grayscale=False,
+        saveImage=False,
+        noRemoveBackground=False,
+        noExtractionImage=False,
+        noRegistrationImage=False,
+        noGlobalGMMImage=False,
+        noLocalGMMImage=False,
     ):
         """
         Find global and local patterns, beginning from the raw image.
@@ -313,11 +313,11 @@ class InsituTools(object):
             inputImage, cv2.IMREAD_GRAYSCALE if grayscale else cv2.IMREAD_COLOR
         )
         if input_image is None:
-            raise IOError('Image reading failure.')
+            raise IOError("Image reading failure.")
         if outputDirectory is None:
             outputDirectory = os.path.dirname(inputImage)
         elif not os.path.isdir(outputDirectory):
-            raise IsADirectoryError('Invalid output directory.')
+            raise IsADirectoryError("Invalid output directory.")
         if name is None:
             name = os.path.basename(inputImage).split(".")[0]
         extract_image, mask = algorithm.extract(
@@ -336,68 +336,65 @@ class InsituTools(object):
             register_image, mask, numberOfGlobalKernels, not saveImage
         )
         local_image, local_label, local_levels = algorithm.local_gmm(
-            global_label,
-            global_levels,
-            limitOfLocalKernels,
-            register_image
+            global_label, global_levels, limitOfLocalKernels, register_image
         )
         if saveImage:
             if (
-                    not (noRemoveBackground or noExtractionImage)
-                    and not cv2.imwrite(
-                os.path.join(outputDirectory, name + "_extract_image.bmp"),
-                extract_image,
-            )
-                    or not noRegistrationImage
-                    and not cv2.imwrite(
-                os.path.join(outputDirectory, name + "_register_image.bmp"),
-                register_image,
-            )
-                    or not noGlobalGMMImage
-                    and not cv2.imwrite(
-                os.path.join(outputDirectory, name + "_globalGMM_image.bmp"),
-                global_image,
-            )
-                    or not noLocalGMMImage
-                    and not cv2.imwrite(
-                os.path.join(outputDirectory, name + "_localGMM_image.bmp"),
-                local_image,
-            )
+                not (noRemoveBackground or noExtractionImage)
+                and not cv2.imwrite(
+                    os.path.join(outputDirectory, name + "_extract_image.bmp"),
+                    extract_image,
+                )
+                or not noRegistrationImage
+                and not cv2.imwrite(
+                    os.path.join(outputDirectory, name + "_register_image.bmp"),
+                    register_image,
+                )
+                or not noGlobalGMMImage
+                and not cv2.imwrite(
+                    os.path.join(outputDirectory, name + "_globalGMM_image.bmp"),
+                    global_image,
+                )
+                or not noLocalGMMImage
+                and not cv2.imwrite(
+                    os.path.join(outputDirectory, name + "_localGMM_image.bmp"),
+                    local_image,
+                )
             ):
-                raise IOError('Image writing failure.')
+                raise IOError("Image writing failure.")
         if (
-                not cv2.imwrite(os.path.join(outputDirectory, name + "_mask.bmp"), mask)
-                or not cv2.imwrite(
-            os.path.join(outputDirectory, name + "_globalGMM_label.bmp"),
-            global_label,
-        )
-                or not cv2.imwrite(
-            os.path.join(outputDirectory, name + "_localGMM_label.bmp"), local_label
-        )
+            not cv2.imwrite(os.path.join(outputDirectory, name + "_mask.bmp"), mask)
+            or not cv2.imwrite(
+                os.path.join(outputDirectory, name + "_globalGMM_label.bmp"),
+                global_label,
+            )
+            or not cv2.imwrite(
+                os.path.join(outputDirectory, name + "_localGMM_label.bmp"), local_label
+            )
         ):
-            raise IOError('Mask or label writing failure.')
+            raise IOError("Mask or label writing failure.")
         with open(
-                os.path.join(outputDirectory, name + "_globalGMM_levels.txt"), "w"
+            os.path.join(outputDirectory, name + "_globalGMM_levels.txt"), "w"
         ) as f:
             f.write("\n".join(str(i) for i in global_levels))
         with open(
-                os.path.join(outputDirectory, name + "_localGMM_levels.txt"), "w"
+            os.path.join(outputDirectory, name + "_localGMM_levels.txt"), "w"
         ) as f:
             f.write("\n".join(str(i) for i in local_levels))
 
     @classmethod
     def score(
-            cls,
-            *inputPrefixes,
-            maskSuffix="_mask.bmp",
-            globalLabelSuffix="_globalGMM_label.bmp",
-            localLabelSuffix="_localGMM_label.bmp",
-            localLevelsSuffix="_localGMM_levels.txt",
-            outputTablePath=None,
-            reference=None,
-            globalScoreCutoff=0.0,
-            sparseCutoff=None,
-            noFlipping=False
+        cls,
+        *inputPrefixes,
+        maskSuffix="_mask.bmp",
+        globalLabelSuffix="_globalGMM_label.bmp",
+        localLabelSuffix="_localGMM_label.bmp",
+        localLevelsSuffix="_localGMM_levels.txt",
+        outputTablePath=None,
+        reference=None,
+        globalScoreCutoff=0.0,
+        sparseCutoff=None,
+        noFlipping=False
     ):
         """
         Give scores of processed image labels.
@@ -452,7 +449,7 @@ class InsituTools(object):
                         original orientation.
         """
         if len(inputPrefixes) == 0:
-            fire.Fire(InsituTools, 'score -- --help')
+            fire.Fire(InsituTools, "score -- --help")
             return
         masks = [np.array([])] * len(inputPrefixes)
         global_labels = [np.array([])] * len(inputPrefixes)
@@ -467,7 +464,7 @@ class InsituTools(object):
                 prefix + localLabelSuffix, cv2.IMREAD_GRAYSCALE
             )
             if masks[i] is None or global_labels[i] is None or local_labels[i] is None:
-                raise IOError('Mask or label reading failure.')
+                raise IOError("Mask or label reading failure.")
             print(local_levels_list[i])
             with open(prefix + localLevelsSuffix) as f:
                 local_levels_list[i] = [float(i) for i in f.readlines()]

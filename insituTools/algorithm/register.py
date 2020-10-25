@@ -13,8 +13,9 @@ def get_angle(v1, v2):
 
 
 def saturation_rectified_intensity(image):
-    assert type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 2, \
-        'The input image has to be a uint8 2D numpy array.'
+    assert (
+        type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 2
+    ), "The input image has to be a uint8 2D numpy array."
     image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     saturation = img_as_float(image_hsv[:, :, 1])
     intensity = img_as_float(image_hsv[:, :, 2])
@@ -25,20 +26,24 @@ def saturation_rectified_intensity(image):
 
 
 def rescale_foreground(image, mask):
-    assert type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 2, \
-        'The input image has to be a uint8 2D numpy array.'
-    assert type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2, \
-        'The input mask has to be a uint8 2D numpy array.'
+    assert (
+        type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 2
+    ), "The input image has to be a uint8 2D numpy array."
+    assert (
+        type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2
+    ), "The input mask has to be a uint8 2D numpy array."
     fg_intensity = image[mask > 0]
     fg_range = np.min(fg_intensity), np.max(fg_intensity)
     return rescale_intensity(image, fg_range)
 
 
 def affine_correct(image, mask):
-    assert type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 2, \
-        'The input image has to be a uint8 2D numpy array.'
-    assert type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2, \
-        'The input mask has to be a uint8 2D numpy array.'
+    assert (
+        type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 2
+    ), "The input image has to be a uint8 2D numpy array."
+    assert (
+        type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2
+    ), "The input mask has to be a uint8 2D numpy array."
     fg_pix = np.flip(mask.nonzero())
     pca = PCA(2)
     pca.fit(fg_pix.transpose())
@@ -57,10 +62,12 @@ def affine_correct(image, mask):
 def register(
     image, mask, size=None, patchSize=None, rotate=True, rescale=True, rectify=False
 ):
-    assert type(image) is np.ndarray and image.dtype == np.uint8, \
-        'The input image has to be a uint8 numpy array.'
-    assert type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2, \
-        'The input mask has to be a uint8 2D numpy array.'
+    assert (
+        type(image) is np.ndarray and image.dtype == np.uint8
+    ), "The input image has to be a uint8 numpy array."
+    assert (
+        type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2
+    ), "The input mask has to be a uint8 2D numpy array."
     assert len(size) == 2, "The 'size' should be a tuple of 2 integers."
     assert patchSize is None or type(patchSize) is int
     assert type(rotate) is bool

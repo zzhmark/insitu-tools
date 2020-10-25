@@ -4,10 +4,16 @@ from sklearn.preprocessing import normalize
 
 
 def local_score(label1, label2, blob_levels1, blob_levels2):
-    assert type(label1) is np.ndarray and label1.dtype == np.uint8 and len(label1.shape) == 2, \
-        'The input label has to be a uint8 2D numpy array.'
-    assert type(label2) is np.ndarray and label2.dtype == np.uint8 and len(label2.shape) == 2, \
-        'The input label has to be a uint8 2D numpy array.'
+    assert (
+        type(label1) is np.ndarray
+        and label1.dtype == np.uint8
+        and len(label1.shape) == 2
+    ), "The input label has to be a uint8 2D numpy array."
+    assert (
+        type(label2) is np.ndarray
+        and label2.dtype == np.uint8
+        and len(label2.shape) == 2
+    ), "The input label has to be a uint8 2D numpy array."
     n1, n2 = len(blob_levels1), len(blob_levels2)
     blobs1 = [label1 == i + 1 for i in range(n1)]
     blobs2 = [label2 == i + 1 for i in range(n2)]
@@ -21,14 +27,22 @@ def local_score(label1, label2, blob_levels1, blob_levels2):
 
 
 def global_score(label1, label2, mask1, mask2):
-    assert type(label1) is np.ndarray and label1.dtype == np.uint8 and len(label1.shape) == 2, \
-        'The input label has to be a uint8 2D numpy array.'
-    assert type(label2) is np.ndarray and label2.dtype == np.uint8 and len(label2.shape) == 2, \
-        'The input label has to be a uint8 2D numpy array.'
-    assert type(mask1) is np.ndarray and mask1.dtype == np.uint8 and len(mask1.shape) == 2, \
-        'The input mask has to be a uint8 2D numpy array.'
-    assert type(mask2) is np.ndarray and mask2.dtype == np.uint8 and len(mask2.shape) == 2, \
-        'The input mask has to be a uint8 2D numpy array.'
+    assert (
+        type(label1) is np.ndarray
+        and label1.dtype == np.uint8
+        and len(label1.shape) == 2
+    ), "The input label has to be a uint8 2D numpy array."
+    assert (
+        type(label2) is np.ndarray
+        and label2.dtype == np.uint8
+        and len(label2.shape) == 2
+    ), "The input label has to be a uint8 2D numpy array."
+    assert (
+        type(mask1) is np.ndarray and mask1.dtype == np.uint8 and len(mask1.shape) == 2
+    ), "The input mask has to be a uint8 2D numpy array."
+    assert (
+        type(mask2) is np.ndarray and mask2.dtype == np.uint8 and len(mask2.shape) == 2
+    ), "The input mask has to be a uint8 2D numpy array."
     fg = (mask1 > 0) | (mask2 > 0)
     return normalized_mutual_info_score(label1[fg], label2[fg])
 
@@ -47,16 +61,15 @@ def score(
     global_score_cutoff=0,
     flip=True,
 ):
-    assert len(masks) \
-            == len(global_labels) \
-            == len(local_labels) \
-            == len(local_levels_list), 'The number of input lists should match with each other.'
+    assert (
+        len(masks) == len(global_labels) == len(local_labels) == len(local_levels_list)
+    ), "The number of input lists should match with each other."
     assert type(flip) is bool
     if reference is None:
         reference = [range(len(masks))]
     else:
         if min(reference) < 0 or max(reference) >= len(masks):
-            raise IndexError('Reference index out of range.')
+            raise IndexError("Reference index out of range.")
     n_row = len(reference)
     n_col = len(masks)
     for i in range(n_row):

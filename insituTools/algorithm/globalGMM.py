@@ -5,10 +5,12 @@ from skimage import img_as_ubyte
 
 
 def global_gmm(image, mask, n=5, label_only=True):
-    assert type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 2, \
-        'The input image has to be a uint8 2D numpy array.'
-    assert type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2, \
-        'The input mask has to be a uint8 2D numpy array.'
+    assert (
+        type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 2
+    ), "The input image has to be a uint8 2D numpy array."
+    assert (
+        type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2
+    ), "The input mask has to be a uint8 2D numpy array."
     assert type(n) is int
     assert type(label_only) is bool
     global_mean = int(np.mean(image[mask > 0]))
