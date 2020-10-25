@@ -51,15 +51,15 @@ class InsituTools(object):
             inputImage, cv2.IMREAD_GRAYSCALE if grayscale else cv2.IMREAD_COLOR
         )
         if image is None:
-            raise IOError
+            raise IOError("Image reading failure.")
         image, mask = algorithm.extract(
             image, filterSize, threshold, outputImage is None
         )
         if outputImage is not None:
             if not cv2.imwrite(outputImage, image):
-                raise IOError
+                raise IOError("Image writing failure.")
         if not cv2.imwrite(outputMask, mask):
-            raise IOError
+            raise IOError("Mask writing failure.")
 
     @classmethod
     def register(
@@ -107,7 +107,7 @@ class InsituTools(object):
         )
         mask = cv2.imread(inputMask, cv2.IMREAD_GRAYSCALE)
         if image is None or mask is None:
-            raise IOError
+            raise IOError("Image or mask reading failure.")
         image, mask = algorithm.register(
             image,
             mask,
@@ -118,7 +118,7 @@ class InsituTools(object):
             not noRectification,
         )
         if not cv2.imwrite(outputImage, image) or not cv2.imwrite(outputMask, mask):
-            raise IOError
+            raise IOError("Image or mask writing failure.")
 
     @classmethod
     def globalGMM(
@@ -154,26 +154,26 @@ class InsituTools(object):
         image = cv2.imread(inputImage, cv2.IMREAD_GRAYSCALE)
         mask = cv2.imread(inputMask, cv2.IMREAD_GRAYSCALE)
         if image is None or mask is None:
-            raise IOError
+            raise IOError("Image or mask reading failure.")
         image, label, levels = algorithm.global_gmm(
             image, mask, numberOfGlobalKernels, outputImage is None
         )
         if image is not None:
             if not cv2.imwrite(outputLabel, image):
-                raise IOError
+                raise IOError("Image writing failure.")
         if not cv2.imwrite(outputLabel, label):
-            raise IOError
+            raise IOError("Label reading failure.")
         with open(outputLevels) as f:
             f.write("\n".join(str(i) for i in levels))
 
     @classmethod
     def localGMM(
         cls,
-        inputImage,
         inputLabel,
         inputLevels,
         outputLabel,
         outputLevels,
+        inputImage=None,
         outputImage=None,
         limitOfLocalKernels=10,
     ):
@@ -208,18 +208,18 @@ class InsituTools(object):
         """
         image = cv2.imread(inputImage, cv2.IMREAD_GRAYSCALE)
         label = cv2.imread(inputLabel, cv2.IMREAD_GRAYSCALE)
-        if image is None or label is None:
-            raise IOError
+        if image is None and inputImage is not None or label is None:
+            raise IOError("Image or label reading failure.")
         with open(inputLevels) as f:
             levels = [float(i) for i in f.readlines()]
         image, label, levels = algorithm.local_gmm(
-            image, label, levels, limitOfLocalKernels, outputImage is None
+            label, levels, limitOfLocalKernels, image
         )
         if image is not None:
             if not cv2.imwrite(outputImage, image):
-                raise IOError
+                raise IOError("Image writing failure.")
         if not cv2.imwrite(outputLabel, label):
-            raise IOError
+            raise IOError("Label writing failure.")
         with open(outputLevels) as f:
             f.write("\n".join(str(i) for i in levels))
 
@@ -240,7 +240,7 @@ class InsituTools(object):
         noRectification=False,
         grayscale=False,
         saveImage=False,
-        noRemoveBackGround=False,
+        noRemoveBackground=False,
         noExtractionImage=False,
         noRegistrationImage=False,
         noGlobalGMMImage=False,
@@ -254,7 +254,9 @@ class InsituTools(object):
         :param inputImage: The path to the input image.
         :param outputDirectory: The path to the directory to store all
                                 the output files. Duplicated files will
-                                be overwritten.
+                                be overwritten. If omitted, output files
+                                will be stored in the same directory as
+                                the input image.
         :param name: The mutual basename prefix for each output file.
                         if omitted, the prefix will be the basename of
                         the input image.
@@ -292,7 +294,7 @@ class InsituTools(object):
         :param saveImage: Generate and save the image for each step.
                             By default, no images are generated to
                             save computational resources.
-        :param noRemoveBackGround: In the extraction step, the background of the image
+        :param noRemoveBackground: In the extraction step, the background of the image
                                     will not be turned to white.
         :param noExtractionImage: When specified, the image from the extraction
                                     step will not be saved. It only works when
@@ -311,15 +313,15 @@ class InsituTools(object):
             inputImage, cv2.IMREAD_GRAYSCALE if grayscale else cv2.IMREAD_COLOR
         )
         if input_image is None:
-            raise IOError
+            raise IOError("Image reading failure.")
         if outputDirectory is None:
             outputDirectory = os.path.dirname(inputImage)
         elif not os.path.isdir(outputDirectory):
-            raise IsADirectoryError
+            raise IsADirectoryError("Invalid output directory.")
         if name is None:
             name = os.path.basename(inputImage).split(".")[0]
         extract_image, mask = algorithm.extract(
-            input_image, filterSize, threshold, noRemoveBackGround
+            input_image, filterSize, threshold, noRemoveBackground
         )
         register_image, mask = algorithm.register(
             extract_image if extract_image is not None else input_image,
@@ -334,15 +336,11 @@ class InsituTools(object):
             register_image, mask, numberOfGlobalKernels, not saveImage
         )
         local_image, local_label, local_levels = algorithm.local_gmm(
-            register_image,
-            global_label,
-            global_levels,
-            limitOfLocalKernels,
-            not saveImage,
+            global_label, global_levels, limitOfLocalKernels, register_image
         )
         if saveImage:
             if (
-                not (noRemoveBackGround or noExtractionImage)
+                not (noRemoveBackground or noExtractionImage)
                 and not cv2.imwrite(
                     os.path.join(outputDirectory, name + "_extract_image.bmp"),
                     extract_image,
@@ -363,7 +361,7 @@ class InsituTools(object):
                     local_image,
                 )
             ):
-                raise IOError
+                raise IOError("Image writing failure.")
         if (
             not cv2.imwrite(os.path.join(outputDirectory, name + "_mask.bmp"), mask)
             or not cv2.imwrite(
@@ -374,7 +372,7 @@ class InsituTools(object):
                 os.path.join(outputDirectory, name + "_localGMM_label.bmp"), local_label
             )
         ):
-            raise IOError
+            raise IOError("Mask or label writing failure.")
         with open(
             os.path.join(outputDirectory, name + "_globalGMM_levels.txt"), "w"
         ) as f:
@@ -450,6 +448,9 @@ class InsituTools(object):
                         flipping will take place and comparisons are based on the
                         original orientation.
         """
+        if len(inputPrefixes) == 0:
+            fire.Fire(InsituTools, "score -- --help")
+            return
         masks = [np.array([])] * len(inputPrefixes)
         global_labels = [np.array([])] * len(inputPrefixes)
         local_labels = [np.array([])] * len(inputPrefixes)
@@ -463,11 +464,11 @@ class InsituTools(object):
                 prefix + localLabelSuffix, cv2.IMREAD_GRAYSCALE
             )
             if masks[i] is None or global_labels[i] is None or local_labels[i] is None:
-                raise IOError
+                raise IOError("Mask or label reading failure.")
             print(local_levels_list[i])
             with open(prefix + localLevelsSuffix) as f:
                 local_levels_list[i] = [float(i) for i in f.readlines()]
-        n_row = len(reference)
+        n_row = len(inputPrefixes) if reference is None else len(reference)
         n_col = len(inputPrefixes)
         if sparseCutoff is None:
             score_table = np.zeros((n_row, n_col))
@@ -477,11 +478,11 @@ class InsituTools(object):
                 globalScoreCutoff = sparseCutoff
         score_table = algorithm.score(
             score_table,
-            reference,
             masks,
             global_labels,
             local_labels,
             local_levels_list,
+            reference,
             globalScoreCutoff,
             not noFlipping,
         )
@@ -502,5 +503,5 @@ class InsituTools(object):
                 score_table.to_csv(outputTablePath)
 
 
-if __name__ == "__main__":
+def main():
     fire.Fire(InsituTools)
