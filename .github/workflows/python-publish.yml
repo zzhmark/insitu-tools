@@ -15,6 +15,10 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+    - name: Checkout the most recent tag
+      run:  |
+        tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+        git checkout $tag
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
