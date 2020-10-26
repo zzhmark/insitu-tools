@@ -18,7 +18,12 @@ class InsituTools(object):
     | also has the potential of being applied to other kinds of images.
     """
 
-    version = __version__
+    @classmethod
+    def version(cls):
+        """
+        Show current insituTools package version.
+        """
+        return __version__
 
     @classmethod
     def extract(
