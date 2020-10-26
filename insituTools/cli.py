@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.sparse import save_npz, dok_matrix
 
 from insituTools import algorithm
-
+from insituTools import __version__
 
 class InsituTools(object):
     """
@@ -17,6 +17,8 @@ class InsituTools(object):
     | patterns in In Situ expression image of Drosophila embryos. It
     | also has the potential of being applied to other kinds of images.
     """
+
+    version = __version__
 
     @classmethod
     def extract(
