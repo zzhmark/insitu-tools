@@ -66,7 +66,7 @@ def score(
     ), "The number of input lists should match with each other."
     assert type(flip) is bool
     if reference is None:
-        reference = [range(len(masks))]
+        reference = [*range(len(masks))]
     else:
         if min(reference) < 0 or max(reference) >= len(masks):
             raise IndexError("Reference index out of range.")

@@ -3,7 +3,6 @@ import cv2
 from skimage.exposure import rescale_intensity, adjust_sigmoid
 from skimage.util import invert, img_as_float, img_as_ubyte
 from sklearn.decomposition import PCA
-from skimage.measure import block_reduce
 
 
 def get_angle(v1, v2):
@@ -14,7 +13,7 @@ def get_angle(v1, v2):
 
 def saturation_rectified_intensity(image):
     assert (
-        type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 2
+        type(image) is np.ndarray and image.dtype == np.uint8 and len(image.shape) == 3
     ), "The input image has to be a uint8 2D numpy array."
     image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     saturation = img_as_float(image_hsv[:, :, 1])
@@ -59,17 +58,16 @@ def affine_correct(image, mask):
     return image_out, mask_out
 
 
-def register(
-    image, mask, size=None, patchSize=None, rotate=True, rescale=True, rectify=False
-):
+def register(image, mask, size=None, rotate=True, rescale=True, rectify=False):
     assert (
         type(image) is np.ndarray and image.dtype == np.uint8
     ), "The input image has to be a uint8 numpy array."
     assert (
         type(mask) is np.ndarray and mask.dtype == np.uint8 and len(mask.shape) == 2
     ), "The input mask has to be a uint8 2D numpy array."
-    assert len(size) == 2, "The 'size' should be a tuple of 2 integers."
-    assert patchSize is None or type(patchSize) is int
+    assert (
+        size is None or len(size) == 2
+    ), "The 'size' should be a tuple of 2 integers, or does not exist."
     assert type(rotate) is bool
     assert type(rescale) is bool
     assert type(rectify) is bool
@@ -86,8 +84,4 @@ def register(
     if size is not None:
         image = cv2.resize(image, size)
         mask = cv2.resize(mask, size)
-    if patchSize is not None:
-        patch = (patchSize, patchSize)
-        image = block_reduce(image, patch, np.mean, 255)
-        mask = block_reduce(mask, patch, np.min)
     return image, mask
